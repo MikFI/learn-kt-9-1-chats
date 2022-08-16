@@ -25,7 +25,11 @@ class Chat(
     }
 
     fun isUserInChat(user: ChatUser): Boolean {
-        return user in userList
+        if (user !in userList){
+            println("Чат недоступен или удалён")
+            return false
+        }
+        return true
     }
 
     fun addMessage(message: Message) {

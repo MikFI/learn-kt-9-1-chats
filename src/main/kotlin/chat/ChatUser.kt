@@ -33,16 +33,13 @@ class ChatUser(
     //пишем сообщение пользователю
     fun newMessage(user: ChatUser, msgText: String) {
         //ищем адресата в списке чатов отправителя
-        val toUser = chatList.keys.find { it == user }
-        val chat: Chat
-        //если не найден, создаём чат, суём его в список чатов себе и тому, кому написали
-        if (toUser == null) {
-            chat = chatService.createChat(listOf(this, user)) ?: return
-            chatList[user] = chat
-            chatService.addUserToChat(fromUser = this, toUser = user, chat)
-        } else {
-            chat = chatList[toUser]!! //тут можно без not-null assertion обойтись?
-
+        val chat = chatList.getOrPut(user){
+            //...или создаём новый чат с ним и суём его в список чатов отправителя и адресата
+            val newChat = chatService.createChat(listOf(this, user)) ?: return
+            chatList[user] = newChat
+            chatService.addUserToChat(fromUser = this, toUser = user, newChat)
+            //последняя инструкция лямбды уходит как возвращаемое ею значение
+            newChat
         }
         //отправляем сообщение в чат пользователю
         chatService.newMessage(chat, this, msgText)
@@ -81,7 +78,7 @@ class ChatUser(
     //читаем последнее сообщение из каждого чата
     fun getLastMessages(): List<Message> {
         val result = mutableListOf<Message>()
-        //все существующие в списке пользователя чаты должны иметь минимум одно сообщение - поэтому тут !!
+        //все существующие в списке пользователя чаты должны иметь минимум одно сообщение
         chatList.forEach { result.add(chatService.getLastMessage(it.value)) }
         return result
     }

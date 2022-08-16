@@ -20,7 +20,6 @@ class ChatService {
     }
 
     //создаём чат и возвращаем его экземпляр вызывающему
-    //TODO текст о несозданном чате
     fun createChat(users: List<ChatUser>): Chat? {
         val validUsers = checkUserValidity(users) ?: return null
         chatId++
@@ -35,11 +34,11 @@ class ChatService {
         //distinct возвращает неповторяемые элементы
         val validUsers = users.distinct()
         if (validUsers.size > 1) return validUsers
+        println("В чате должно быть 2 существующих пользователя")
         return null
     }
 
     //создаём сообщение в указанный чат
-    //TODO сообщение о невозможночти писать в чужой чат
     fun newMessage(chat: Chat, author: ChatUser, text: String) {
         if (!chat.isUserInChat(author)) return
         messageId++
@@ -57,10 +56,7 @@ class ChatService {
 
     //удаляем сообщение
     fun deleteMessage(message: Message, user: ChatUser) {
-        if (!message.chat.isUserInChat(user)) {
-            println("Указанный чат недоступен либо удалён")
-            return
-        }
+        if (!message.chat.isUserInChat(user)) return
         if (message.author != user) {
             println("Удалить чужое сообщение нельзя")
             return
@@ -73,16 +69,17 @@ class ChatService {
     }
 
     //редактируем указанное сообщение
-    //TODO сообщение о невозможности редактировать чужое
     fun editMessage(author: ChatUser, message: Message, text: String) {
-        if (message.author != author) return
+        if (message.author != author) {
+            println("Нельзя редактировать чужое сообщение")
+            return
+        }
         val currentTime = System.currentTimeMillis()
         message.text = text
         message.editDate = currentTime
     }
 
     //возвращаем запрошенные сообщения из чата
-    //TODO сообщение о том, что пользователя в запрошенном чате нет
     fun getMessageList(
         chat: Chat,
         user: ChatUser,
@@ -102,7 +99,6 @@ class ChatService {
     }
 
     //возвращаем последнее сообщение в указанном чате
-    //TODO сообщение пользователю, что его в чате нет
     fun getLastMessage(chat: Chat): Message {
         return chat.getMessageList().last()
     }
