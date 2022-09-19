@@ -90,11 +90,18 @@ class ChatService {
         if (!chat.isUserInChat(user)) return null
         //если указан номер сообщения - передаём количество, начиная с указанного id
         return if (startId > -1) {
-            chat.getMessageList().filter { !it.deleted && it.id >= startId }.take(count)
+            chat.getMessageList().asSequence()
+                .filter { !it.deleted && it.id >= startId }
+                .take(count)
+                .toList()
         }
         //в противном случае передаём количество сообщений с конца
         else {
-            chat.getMessageList().asReversed().filter { !it.deleted }.take(count).asReversed()
+            chat.getMessageList().asReversed().asSequence()
+                .filter { !it.deleted }
+                .take(count)
+                .toList()
+                .asReversed()
         }
     }
 
